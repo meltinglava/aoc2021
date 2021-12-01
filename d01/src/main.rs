@@ -1,8 +1,14 @@
-use std::{fs::File, io::{Result, BufReader, BufRead}, path::Path};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader, Result},
+    path::Path,
+};
 
 fn read_lines_as_numbers<P: AsRef<Path>>(path: P) -> Result<Vec<usize>> {
     let f = BufReader::new(File::open(path)?);
-    f.lines().map(|l| Ok(l?.parse::<usize>().unwrap())).collect()
+    f.lines()
+        .map(|l| Ok(l?.parse::<usize>().unwrap()))
+        .collect()
 }
 
 fn increases(input: &[usize]) -> usize {
