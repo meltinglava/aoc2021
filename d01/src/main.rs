@@ -18,7 +18,7 @@ fn increases(input: &[usize]) -> usize {
 fn main() -> Result<()> {
     let input = read_lines_as_numbers("input.txt")?;
     println!("Part1: {}", increases(&input));
-    let part2: Vec<usize> = input.windows(3).map(|t| t.into_iter().sum()).collect();
+    let part2: Vec<usize> = input.windows(3).map(|t| t.iter().sum()).collect();
     println!("Part2: {}", increases(&part2));
     Ok(())
 }
