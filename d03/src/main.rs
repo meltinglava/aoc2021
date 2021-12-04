@@ -41,7 +41,7 @@ fn epsilon(n: usize) -> usize {
 #[repr(usize)]
 enum LSR {
     CO2,
-    O,
+    O2,
 }
 
 fn life_support_rating(input: &[usize], a: LSR) -> usize {
@@ -74,7 +74,7 @@ fn main() -> Result<()> {
     let gam = gamma(&input);
     let eps = epsilon(gam);
     println!("Part1: {}", gam * eps);
-    let oxy = life_support_rating(&input, LSR::O);
+    let oxy = life_support_rating(&input, LSR::O2);
     let c02 = life_support_rating(&input, LSR::CO2);
     println!("Part1: {}", oxy * c02);
     Ok(())
