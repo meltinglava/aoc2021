@@ -1,16 +1,16 @@
-use std::{collections::HashMap, fs::read_to_string, num::ParseIntError, str::FromStr};
+use std::{fs::read_to_string, num::ParseIntError, str::FromStr};
 
 #[derive(Debug, Clone)]
 struct Ecosystem {
-    fish: HashMap<u8, usize>,
+    fish: [usize; 9],
     start: bool,
 }
 
 impl Ecosystem {
-    fn new(fish: &[u8]) -> Self {
-        let mut map = HashMap::new();
+    fn new(fish: &[usize]) -> Self {
+        let mut map = [0; 9];
         for f in fish {
-            map.entry(*f).and_modify(|f| *f += 1).or_insert(1);
+            map[*f] += 1;
         }
         Self {
             fish: map,
@@ -20,37 +20,19 @@ impl Ecosystem {
 }
 
 impl Iterator for Ecosystem {
-    type Item = HashMap<u8, usize>;
+    type Item = [usize; 9];
 
     fn next(&mut self) -> Option<Self::Item> {
-        Some(match self.start {
+        match self.start {
             true => {
                 self.start = false;
-                self.fish.clone()
             }
             false => {
-                let mut add_fish = 0;
-                let mut map = HashMap::new();
-                self.fish
-                    .iter()
-                    .map(|(d, n)| (*d, *n))
-                    .map(|(d, n)| match d.checked_sub(1) {
-                        Some(s) => (s, n),
-                        None => {
-                            add_fish += n;
-                            (6, n)
-                        }
-                    })
-                    .for_each(|(d, n)| {
-                        map.entry(d).and_modify(|f| *f += n).or_insert(n);
-                    });
-                if add_fish != 0 {
-                    map.insert(8, add_fish);
-                }
-                self.fish = map;
-                self.fish.clone()
+                self.fish.rotate_left(1);
+                self.fish[6] += self.fish[8];
             }
-        })
+        };
+        Some(self.fish)
     }
 }
 
@@ -71,24 +53,16 @@ fn main() {
     let mut fish: Ecosystem = read_to_string("input.txt").unwrap().parse().unwrap();
     println!(
         "Part 1: {}",
-        fish.clone()
-            .nth(80)
-            .unwrap()
-            .iter()
-            .map(|(_, n)| n)
-            .sum::<usize>()
+        fish.clone().nth(80).unwrap().iter().sum::<usize>()
     );
-    println!(
-        "Part 2: {}",
-        fish.nth(256).unwrap().iter().map(|(_, n)| n).sum::<usize>()
-    );
+    println!("Part 2: {}", fish.nth(256).unwrap().iter().sum::<usize>());
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const TEST: &[&[u8]] = &[
+    const TEST: &[&[usize]] = &[
         &[3, 4, 3, 1, 2],
         &[2, 3, 2, 0, 1],
         &[1, 2, 1, 6, 0, 8],
@@ -126,9 +100,6 @@ mod tests {
     #[test]
     fn long_test() {
         let mut fish = Ecosystem::new(TEST[0]);
-        assert_eq!(
-            fish.nth(256).unwrap().iter().map(|(_, n)| n).sum::<usize>(),
-            26984457539
-        )
+        assert_eq!(fish.nth(256).unwrap().iter().sum::<usize>(), 26984457539)
     }
 }
