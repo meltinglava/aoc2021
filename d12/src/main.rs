@@ -11,7 +11,7 @@ struct Node<'a> {
 }
 
 impl<'a> Node<'a> {
-    fn new (name: &'a str, size: Size) -> Self {
+    fn new(name: &'a str, size: Size) -> Self {
         Self { name, size }
     }
 
@@ -25,19 +25,22 @@ impl<'a> Node<'a> {
 }
 
 impl<'a> TryFrom<&'a str> for Node<'a> {
-
     type Error = String;
 
     fn try_from(s: &'a str) -> Result<Self, Self::Error> {
         let size = match s {
             s if s.chars().all(|c| c.is_ascii_uppercase()) => Size::Large,
             s if s.chars().all(|c| c.is_ascii_lowercase()) => Size::Small,
-            n => return Err(format!("all letters need to be the same case, found: {}", n))
+            n => {
+                return Err(format!(
+                    "all letters need to be the same case, found: {}",
+                    n
+                ))
+            }
         };
         Ok(Self::new(s, size))
     }
 }
-
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 enum Size {
@@ -46,10 +49,12 @@ enum Size {
 }
 
 fn parse_data(input: &str) -> Graph {
-    let edges: Vec<_> = input.lines().map(|n| n.split_once('-').unwrap()).map(|n| {
-        [n.0, n.1].map(|n| Node::try_from(n).unwrap())
-    }).collect();
-    let mut graph = UnGraphMap::with_capacity(edges.len()*2, edges.len());
+    let edges: Vec<_> = input
+        .lines()
+        .map(|n| n.split_once('-').unwrap())
+        .map(|n| [n.0, n.1].map(|n| Node::try_from(n).unwrap()))
+        .collect();
+    let mut graph = UnGraphMap::with_capacity(edges.len() * 2, edges.len());
     for edge in &edges {
         for node in edge {
             if !graph.contains_node(*node) {
@@ -62,15 +67,19 @@ fn parse_data(input: &str) -> Graph {
 }
 
 fn traverse_p1<'a, 'b>(node: Node<'a>, mut small: HashSet<Node<'a>>, graph: &Graph<'b>) -> usize
-where 'a: 'b
+where
+    'a: 'b,
 {
     if node == Node::end() {
         return 1;
     }
     if node.size == Size::Small && !small.insert(node) {
-        return 0
+        return 0;
     }
-    graph.neighbors(node).map(|n| traverse_p1(n, small.clone(), graph)).sum()
+    graph
+        .neighbors(node)
+        .map(|n| traverse_p1(n, small.clone(), graph))
+        .sum()
 }
 
 fn part1(graph: &Graph) -> usize {
@@ -78,8 +87,14 @@ fn part1(graph: &Graph) -> usize {
     traverse_p1(Node::start(), small, graph)
 }
 
-fn traverse_p2<'a, 'b>(node: Node<'a>, mut small: HashSet<Node<'a>>, graph: &Graph<'b>, mut one_twice: bool) -> usize
-where 'a: 'b
+fn traverse_p2<'a, 'b>(
+    node: Node<'a>,
+    mut small: HashSet<Node<'a>>,
+    graph: &Graph<'b>,
+    mut one_twice: bool,
+) -> usize
+where
+    'a: 'b,
 {
     if node == Node::end() {
         return 1;
@@ -91,14 +106,16 @@ where 'a: 'b
             one_twice = true;
         }
     }
-    graph.neighbors(node).map(|n| traverse_p2(n, small.clone(), graph, one_twice)).sum()
+    graph
+        .neighbors(node)
+        .map(|n| traverse_p2(n, small.clone(), graph, one_twice))
+        .sum()
 }
 
 fn part2(graph: &Graph) -> usize {
     let small = HashSet::new();
     traverse_p2(Node::start(), small, graph, false)
 }
-
 
 fn main() {
     let input = read_to_string("input.txt").unwrap();
