@@ -57,9 +57,7 @@ fn parse_data(input: &str) -> Graph {
     let mut graph = UnGraphMap::with_capacity(edges.len() * 2, edges.len());
     for edge in &edges {
         for node in edge {
-            if !graph.contains_node(*node) {
-                graph.add_node(*node);
-            }
+            graph.add_node(*node);
         }
         graph.add_edge(edge[0], edge[1], ());
     }
